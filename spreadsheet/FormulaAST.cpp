@@ -145,33 +145,34 @@ namespace ASTImpl {
 
             double Evaluate(const SheetInterface& sheet) const override {
                 double result;
-                double lhs = lhs_->Evaluate(sheet);
-                double rhs = rhs_->Evaluate(sheet);
+                double lhs_result = lhs_->Evaluate(sheet);
+                double rhs_result = rhs_->Evaluate(sheet);
 
                 switch (type_) {
                 case Type::Add: {
-                    result = lhs + rhs;
+                    result = lhs_result + rhs_result;
                     break;
                 }
                 case Type::Subtract: {
-                    result = lhs - rhs;
+                    result = lhs_result - rhs_result;
                     break;
                 }
                 case Type::Multiply: {
-                    result = lhs * rhs;
+                    result = lhs_result * rhs_result;
                     break;
                 }
                 case Type::Divide: {
-                    result = lhs / rhs;
+                    if (std::abs(rhs_result) < std::numeric_limits<double>::epsilon()) throw FormulaError(FormulaError::Category::Arithmetic);
+                    result = lhs_result / rhs_result;
                     break;
                 }
                 default:
                     assert(false);
                 }
-                //only one of these checks doesn't pass tests, both at once does
-                if (!std::isfinite(result) ||  std::abs(result) < std::numeric_limits<double>::epsilon()) {
+                if (!std::isfinite(result)) {
                     throw FormulaError(FormulaError::Category::Arithmetic);
                 }
+                
                 return result;
             }
 
